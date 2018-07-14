@@ -2,8 +2,8 @@ package io
 
 import (
     "encoding/json"
-    "gopkg.in/yaml.v2"
     "go-utils/fs"
+    "gopkg.in/yaml.v2"
 )
 
 // Parses JSON from the file on filesystem
@@ -16,7 +16,6 @@ func ParseJson(fileName string, out interface{}) (err error) {
     err = json.Unmarshal([]byte(text), out)
     return err
 }
-
 
 // Parses YML from the file on filesystem
 func ParseYml(fileName string, out interface{}) error {

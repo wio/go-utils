@@ -1,16 +1,16 @@
 package io
 
 import (
-    "runtime"
     "os"
-    "path/filepath"
     "path"
+    "path/filepath"
+    "runtime"
 )
 
 const (
     WINDOWS = "windows"
-    LINUX = "linux"
-    DARWIN = "darwin"
+    LINUX   = "linux"
+    DARWIN  = "darwin"
     UNKNOWN = "unknown"
 )
 
@@ -65,4 +65,3 @@ func GetOS() string {
         return UNKNOWN
     }
 }
-

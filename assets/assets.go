@@ -1,51 +1,10 @@
 package assets
 
 import (
-    "path/filepath"
-    "os"
     "go-utils/fs"
-    "github.com/gobuffalo/packr"
-    "go-utils/errors"
+    "os"
+    "path/filepath"
 )
-
-type boxStruct struct {
-    Box packr.Box
-    Initialized bool
-}
-
-var box = boxStruct {
-    Initialized: false,
-}
-
-// Creates a pool of files that are static assets. When binary is compiled, these files will
-// be included in that. Path provided is the path to the folder where assets are stored
-func CreateStaticAssetsBox(packrBox packr.Box) {
-    if box.Initialized {
-        errors.String("static assets already created and initialized")
-    } else {
-        box = boxStruct{
-            Box: packrBox,
-            Initialized: true,
-        }
-    }
-}
-
-// Writes file stored in binary to actual file system.
-// assetFilePath is a relative path to assets folder
-func WriteFile(assetFilePath string, newPath string) error {
-    bytes, err := box.Box.MustBytes(assetFilePath)
-    if err != nil {
-        return err
-    } else {
-        return fs.WriteFile(newPath, bytes)
-    }
-}
-
-// Reads a file and returns bytes
-// path is a relative path to assets folder
-func ReadFile(path string) ([]byte, error) {
-    return box.Box.MustBytes(path)
-}
 
 // This allows for copying asset files by creating an asset.json file. You can check the format of the file
 // down below. You can provide constraints and extra info and this function will do everything
@@ -223,4 +182,4 @@ func CopyProjectAssets(structureData *StructureTypeData, constraintsProvided Str
     ]
   }
 }
- */
+*/

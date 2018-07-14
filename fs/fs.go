@@ -2,13 +2,14 @@ package fs
 
 import (
     "github.com/spf13/afero"
-    "path/filepath"
     "os"
+    "path/filepath"
     "time"
+    "go-utils/errors"
 )
 
 var (
-    OsFs = afero.NewOsFs()
+    OsFs  = afero.NewOsFs()
     MemFs = afero.NewMemMapFs()
 )
 
@@ -61,7 +62,7 @@ func Name() string {
     return fileConfig.FileSystem.Name()
 }
 
-// Open opens a file, returning it or an error, if any happens.
+// Open opens a file, returning it or an error, if anything happens.
 func Open(name string) (afero.File, error) {
     return fileConfig.FileSystem.Open(name)
 }
@@ -92,4 +93,12 @@ func Rename(oldname, newname string) error {
 // happens.
 func Stat(name string) (os.FileInfo, error) {
     return fileConfig.FileSystem.Stat(name)
+}
+
+func Symlink(oldName string, newName string) (error) {
+    if fileConfig.FileSystem == MemFs {
+        return errors.String("Symlink only available for OS filesystem")
+    } else {
+        return os.Symlink(oldName, newName)
+    }
 }

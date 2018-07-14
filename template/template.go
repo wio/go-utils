@@ -1,17 +1,28 @@
 package template
 
 import (
-    "strings"
-    "go-utils/fs"
+    "github.com/valyala/fasttemplate"
     "go-utils/errors"
+    "go-utils/fs"
+    "io"
 )
 
-func IOReplace(path string, values map[string]string) error {
+// Converts normal function for templates into Tag function used by fasttemplate
+func TagFunc(function func(io.Writer, string) (int, error)) fasttemplate.TagFunc {
+    return fasttemplate.TagFunc(function)
+}
+
+// Reads a file, replaces template strings with values provided, and writes the file back with new changes
+func IOReplace(path string, start, end string, values map[string]interface{}) error {
     data, err := fs.ReadFile(path)
     if nil != err {
         return errors.ReadFileError{FileName: path, Err: err}
     }
-    result := Replace(string(data), values)
+
+    template := string(data)
+    t := fasttemplate.New(template, start, end)
+
+    result := t.ExecuteString(values)
     err = fs.WriteFile(path, []byte(result))
     if nil != err {
         return errors.WriteFileError{FileName: path, Err: err}
@@ -20,9 +31,8 @@ func IOReplace(path string, values map[string]string) error {
 }
 
 // Replaces template strings from a string give and provides a new string
-func Replace(template string, values map[string]string) string {
-    for match, replace := range values {
-        template = strings.Replace(template, "{{"+match+"}}", replace, -1)
-    }
-    return template
+func Replace(template, start, end string, values map[string]interface{}) string {
+    t := fasttemplate.New(template, start, end)
+
+    return t.ExecuteString(values)
 }

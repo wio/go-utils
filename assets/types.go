@@ -33,12 +33,12 @@ type StructureConstraint struct {
 
 type StructureConstraints struct {
     DirectoryConstraints map[string]StructureConstraint
-    FileConstraints map[string]StructureConstraint
+    FileConstraints      map[string]StructureConstraint
 }
 
 // ##################################### Extra information needed by asset.json file ###########################
 type StructureExtraInfo struct {
-    ProjectDirectory string
+    ProjectDirectory  string
     PlatformDirectory string
-    Update bool
+    Update            bool
 }

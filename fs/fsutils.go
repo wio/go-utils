@@ -1,13 +1,13 @@
 package fs
 
 import (
-    "path/filepath"
     "go-utils/errors"
+    "path/filepath"
 
-    "github.com/spf13/afero"
-    "os"
-    "io"
     "bytes"
+    "io"
+    "os"
+    "github.com/spf13/afero"
 )
 
 // Checks if the give path is a director and based on the returns
@@ -42,8 +42,16 @@ func IsDirEmpty(name string) (bool, error) {
 // of the source file. The file mode will be copied from the source and
 // the copied data is synced/flushed to stable storage.
 func CopyFile(src, dst string, override bool) error {
-    if !override {
+    if PathExists(dst) && !override {
         return nil
+    }
+
+    // check directory and throw and error if it is given
+    status, err := IsDir(src)
+    if err != nil {
+        return err
+    } else if status {
+        return errors.Stringf("Src Path [%s] cannot be a directory", src)
     }
 
     if !PathExists(src) {
@@ -92,7 +100,7 @@ func CopyFile(src, dst string, override bool) error {
 // Source directory must exist, destination directory must *not* exist.
 // Symlinks are ignored and skipped.
 func CopyDir(src string, dst string, override bool) (err error) {
-    if !override {
+    if PathExists(dst) && !override {
         return
     } else {
         if err := RemoveAll(dst); err != nil {
@@ -157,7 +165,7 @@ func CopyDir(src string, dst string, override bool) (err error) {
 
 // Generic copy function that can copy anything from src to destination
 func Copy(src string, dst string, override bool) error {
-    if !override {
+    if PathExists(dst) && !override {
         return nil
     }
 
@@ -214,33 +222,31 @@ func Path(values ...string) string {
 
 // Checks if path exists and returns true and false based on that
 func PathExists(path string) bool {
-    _, err := fileConfig.FileSystem.Stat(path)
-    if os.IsNotExist(err) {
+    _, err := Stat(path)
+    if os.IsNotExist(err) || err != nil {
         return false
     }
-    if err != nil {
-        return false
-    }
+
     return true
 }
 
 // Deletes all the files from the directory
 func RemoveContents(dir string) error {
-    d, err := os.Open(dir)
+    d, err := Open(dir)
     if err != nil {
         return err
     }
+
     defer d.Close()
     names, err := d.Readdirnames(-1)
     if err != nil {
         return err
     }
+
     for _, name := range names {
-        err = os.RemoveAll(filepath.Join(dir, name))
-        if err != nil {
+        if err = RemoveAll(filepath.Join(dir, name)); err != nil {
             return err
         }
     }
     return nil
 }
-
