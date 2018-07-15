@@ -95,9 +95,21 @@ func Stat(name string) (os.FileInfo, error) {
     return fileConfig.FileSystem.Stat(name)
 }
 
+// Link creates newname as a hard link to the oldname file.
+// If there is an error, it will be of type *LinkError.
+func Link(oldname, newname string) error {
+    if fileConfig.FileSystem == MemFs {
+        return &os.LinkError{Err: errors.String("link only available for OS filesystem")}
+    } else {
+        return os.Link(oldname, newname)
+    }
+}
+
+// Symlink creates newname as a symbolic link to oldname.
+// If there is an error, it will be of type *LinkError.
 func Symlink(oldName string, newName string) error {
     if fileConfig.FileSystem == MemFs {
-        return errors.String("Symlink only available for OS filesystem")
+        return &os.LinkError{Err: errors.String("symlink only available for OS filesystem")}
     } else {
         return os.Symlink(oldName, newName)
     }

@@ -17,6 +17,8 @@ const (
 )
 
 func SetupFunction() {
+    SetFileSystem(MemFs)
+
     // for testing we will use memory filesystem
     SetFileSystem(MemFs)
 
@@ -42,6 +44,8 @@ func SetupFunction() {
 }
 
 func TearDownFunction() {
+    SetFileSystem(MemFs)
+
     if err := RemoveAll(allFilesDirectory); err != nil {
         panic(err)
     }
