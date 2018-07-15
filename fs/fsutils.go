@@ -5,9 +5,9 @@ import (
     "path/filepath"
 
     "bytes"
+    "github.com/spf13/afero"
     "io"
     "os"
-    "github.com/spf13/afero"
 )
 
 // Checks if the give path is a director and based on the returns
@@ -44,6 +44,8 @@ func IsDirEmpty(name string) (bool, error) {
 func CopyFile(src, dst string, override bool) error {
     if PathExists(dst) && !override {
         return nil
+    } else if !PathExists(src) {
+        return errors.Stringf("src path [%s] does not exist", src)
     }
 
     // check directory and throw and error if it is given
@@ -51,11 +53,7 @@ func CopyFile(src, dst string, override bool) error {
     if err != nil {
         return err
     } else if status {
-        return errors.Stringf("Src Path [%s] cannot be a directory", src)
-    }
-
-    if !PathExists(src) {
-        return errors.Stringf("Path [%s] does not exist", src)
+        return errors.Stringf("src path [%s] cannot be a directory", src)
     }
 
     in, err := Open(src)
@@ -101,15 +99,13 @@ func CopyFile(src, dst string, override bool) error {
 // Symlinks are ignored and skipped.
 func CopyDir(src string, dst string, override bool) (err error) {
     if PathExists(dst) && !override {
-        return
+        return nil
+    } else if !PathExists(src) {
+        return errors.Stringf("src path [%s] does not exist", src)
     } else {
         if err := RemoveAll(dst); err != nil {
             return err
         }
-    }
-
-    if !PathExists(src) {
-        return
     }
 
     src = filepath.Clean(src)
@@ -119,23 +115,24 @@ func CopyDir(src string, dst string, override bool) (err error) {
     if err != nil {
         return err
     }
+
     if !si.IsDir() {
-        return errors.String("source is not a directory")
+        return errors.Stringf("src path [%s] is not a directory", src)
     }
 
     _, err = Stat(dst)
     if err != nil && !os.IsNotExist(err) {
-        return
+        return err
     }
 
     err = MkdirAll(dst, si.Mode())
     if err != nil {
-        return
+        return err
     }
 
     entries, err := afero.ReadDir(fileConfig.FileSystem, src)
     if err != nil {
-        return
+        return err
     }
 
     for _, entry := range entries {
@@ -145,7 +142,7 @@ func CopyDir(src string, dst string, override bool) (err error) {
         if entry.IsDir() {
             err = CopyDir(srcPath, dstPath, override)
             if err != nil {
-                return
+                return err
             }
         } else {
             // Skip symlinks.
@@ -155,7 +152,7 @@ func CopyDir(src string, dst string, override bool) (err error) {
 
             err = CopyFile(srcPath, dstPath, override)
             if err != nil {
-                return
+                return err
             }
         }
     }

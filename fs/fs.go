@@ -2,10 +2,10 @@ package fs
 
 import (
     "github.com/spf13/afero"
+    "go-utils/errors"
     "os"
     "path/filepath"
     "time"
-    "go-utils/errors"
 )
 
 var (
@@ -95,7 +95,7 @@ func Stat(name string) (os.FileInfo, error) {
     return fileConfig.FileSystem.Stat(name)
 }
 
-func Symlink(oldName string, newName string) (error) {
+func Symlink(oldName string, newName string) error {
     if fileConfig.FileSystem == MemFs {
         return errors.String("Symlink only available for OS filesystem")
     } else {
